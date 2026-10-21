@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeonato Interno de Tenis - CNSI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cnsi: {
+                            dark: '#0f172a',      /* Azul marino profundo */
+                            primary: '#1e3a8a',   /* Azul institucional */
+                            light: '#3b82f6',     /* Azul brillante */
+                            accent: '#60a5fa',    /* Azul claro / celeste */
+                            soft: '#eff6ff'       /* Fondo sutil azulado */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .active-tab {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            border-left: 4px solid #60a5fa;
+        }
+        .active-tab i {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col md:flex-row">
+
+    <!-- NAVIGATION SIDEBAR -->
+    <aside class="w-full md:w-64 bg-cnsi-dark text-white flex-shrink-0 flex flex-col justify-between shadow-xl">
+        <div>
+            <!-- Logo & Header -->
+            <div class="p-5 flex items-center space-x-3 border-b border-blue-950">
+                <div class="bg-white p-1.5 rounded-xl shadow-md flex items-center justify-center">
+                    <!-- Logo CNSI -->
+                    <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=100&q=80" alt="CNSI Logo" class="w-10 h-10 object-cover rounded-lg" onerror="this.src='https://ui-avatars.com/api/?name=CNSI&background=1e3a8a&color=fff'">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-sm leading-tight tracking-wide text-white">C. N. S. I.</h1>
+                    <p class="text-[10px] text-cnsi-accent font-semibold tracking-wider uppercase">Tenis Femenino 2026</p>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active-tab w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition duration-200 hover:bg-cnsi-primary">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>Inicio / Dashboard</span>
+                </button>
+                <button onclick="switchTab('standings')" id="nav-standings" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition duration-200 hover:bg-cnsi-primary">
+                    <i class="fa-solid fa-ranking-star w-5 text-center"></i>
+                    <span>Ranking / Tabla</span>
+                </button>
+                <button onclick="switchTab('fixture')" id="nav-fixture" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition duration-200 hover:bg-cnsi-primary">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    <span>Fixture y Resultados</span>
+                </button>
+                <button onclick="switchTab('brackets')" id="nav-brackets" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition duration-200 hover:bg-cnsi-primary">
+                    <i class="fa-solid fa-sitemap w-5 text-center"></i>
+                    <span>Playoffs / Cuadro</span>
+                </button>
+                <button onclick="switchTab('players')" id="nav-players" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition duration-200 hover:bg-cnsi-primary">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>Jugadoras Inscriptas</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer / Reset Data -->
+        <div class="p-4 border-t border-blue-950">
+            <button onclick="resetData()" class="w-full text-xs text-blue-200 hover:text-white flex items-center justify-center space-x-2 py-2 px-3 rounded border border-blue-900 hover:border-cnsi-accent transition">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Restaurar Datos Excel</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Panel Principal - Club Náutico San Isidro</h2>
+                    <p class="text-sm text-gray-500">Resumen general del campeonato interno de tenis.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="bg-blue-50 text-cnsi-primary text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-200">
+                        <i class="fa-solid fa-circle text-[8px] text-cnsi-light mr-1"></i> Temporada 2026 - S1
+                    </span>
+                </div>
+            </header>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="p-3 bg-blue-50 text-cnsi-primary rounded-xl text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Total Jugadoras</p>
+                        <h3 id="dash-total-players" class="text-2xl font-bold text-gray-800">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="p-3 bg-blue-50 text-cnsi-light rounded-xl text-xl">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Partidos Creados</p>
+                        <h3 id="dash-played-matches" class="text-2xl font-bold text-gray-800">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Pendientes</p>
+                        <h3 id="dash-pending-matches" class="text-2xl font-bold text-gray-800">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Categorías</p>
+                        <h3 id="dash-categories-count" class="text-2xl font-bold text-gray-800">4 (A, B, C, D)</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Column Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Matches / Next Matches -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+                    <div class="flex justify-between items-center pb-2 border-b">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-baseball-bat-ball text-cnsi-primary"></i> Próximos Encuentros Programados
+                        </h3>
+                        <button onclick="switchTab('fixture')" class="text-xs text-cnsi-primary hover:underline font-semibold">Ver fixture completo</button>
+                    </div>
+                    <div id="dash-upcoming-list" class="space-y-3">
+                        <!-- Dynamic list -->
+                    </div>
+                </div>
+
+                <!-- Leaderboard Preview & Announcements -->
+                <div class="space-y-6">
+                    <!-- Top Player Banner -->
+                    <div class="bg-gradient-to-br from-cnsi-dark to-cnsi-primary rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-cnsi-accent">#1 Ranking General</span>
+                        <div class="mt-4 flex items-center space-x-4">
+                            <img id="dash-leader-avatar" class="w-14 h-14 rounded-full border-2 border-cnsi-accent object-cover" src="" alt="Líder">
+                            <div>
+                                <h4 id="dash-leader-name" class="font-bold text-lg">Cargando...</h4>
+                                <p id="dash-leader-points" class="text-xs text-blue-200">0 Puntos totales</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Announcements -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
+                        <h4 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-bullhorn text-amber-500"></i> Reglamento CNSI 2026
+                        </h4>
+                        <ul class="text-xs text-gray-600 space-y-2.5">
+                            <li class="p-2.5 bg-blue-50/50 rounded-lg border-l-4 border-cnsi-primary">
+                                <strong>Formato:</strong> Partidos al mejor de 3 sets (Super Tie-Break a 10 puntos en el 3º set).
+                            </li>
+                            <li class="p-2.5 bg-blue-50/50 rounded-lg border-l-4 border-cnsi-light">
+                                <strong>Categorías:</strong> Categorías A, B, C y D.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: STANDINGS / TABLA -->
+        <section id="tab-standings" class="tab-content hidden space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Ranking / Tabla de Posiciones</h2>
+                    <p class="text-sm text-gray-500">Clasificación oficial según el archivo de puntajes del club.</p>
+                </div>
+                <!-- Filter Category & Search -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="text" id="standings-search" oninput="renderStandings()" placeholder="Buscar jugadora..." class="bg-white border border-gray-300 rounded-lg text-xs font-medium px-3 py-2">
+                    <select id="standings-category-filter" onchange="renderStandings()" class="bg-white border border-gray-300 rounded-lg text-xs font-medium px-3 py-2 focus:ring-2 focus:ring-cnsi-primary">
+                        <option value="ALL">Todas las Categorías</option>
+                        <option value="A">Categoría A</option>
+                        <option value="B">Categoría B</option>
+                        <option value="C">Categoría C</option>
+                        <option value="D">Categoría D</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto max-h-[600px]">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold border-b sticky top-0 bg-white">
+                            <tr>
+                                <th class="py-4 px-4 text-center">Rank</th>
+                                <th class="py-4 px-4">Jugadora</th>
+                                <th class="py-4 px-4 text-center">Categoría</th>
+                                <th class="py-4 px-4 text-right font-bold text-cnsi-primary">Puntos Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-table-body" class="divide-y divide-gray-100">
+                            <!-- Dynamic rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: FIXTURE -->
+        <section id="tab-fixture" class="tab-content hidden space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Fixture y Resultados</h2>
+                    <p class="text-sm text-gray-500">Programación de partidos e ingreso de marcadores.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="fixture-category-filter" onchange="renderFixture()" class="bg-white border border-gray-300 rounded-lg text-xs font-medium px-3 py-2">
+                        <option value="ALL">Todas las Categorías</option>
+                        <option value="A">Categoría A</option>
+                        <option value="B">Categoría B</option>
+                        <option value="C">Categoría C</option>
+                        <option value="D">Categoría D</option>
+                    </select>
+                    <button onclick="openNewMatchModal()" class="bg-cnsi-primary text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-cnsi-dark transition flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Programar Partido</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Matches List -->
+            <div id="fixture-matches-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Dynamic match cards -->
+            </div>
+        </section>
+
+        <!-- TAB 4: PLAYOFFS / BRACKETS -->
+        <section id="tab-brackets" class="tab-content hidden space-y-6">
+            <header class="pb-4 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800">Cuadro Eliminatorio (Play-offs)</h2>
+                <p class="text-sm text-gray-500">Esquema de definición por categorías.</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                <p class="text-xs text-gray-500 mb-4">Muestra de llaves finales de torneo:</p>
+                <div class="min-w-[700px] flex justify-between items-center space-x-6 py-6">
+                    <!-- Cuartos de final -->
+                    <div class="space-y-8 flex-1">
+                        <h4 class="text-xs font-bold uppercase text-gray-400 text-center mb-4">Semifinales Cat. A</h4>
+                        
+                        <div class="bg-gray-50 border rounded-xl p-3 space-y-2 shadow-sm border-l-4 border-l-cnsi-primary">
+                            <div class="flex justify-between items-center text-xs font-bold">
+                                <span>Garcia Sanabria Alejandra</span>
+                                <span class="bg-blue-100 text-cnsi-primary px-2 py-0.5 rounded">6 6</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs text-gray-500">
+                                <span>Cougnet Ana</span>
+                                <span>3 2</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 border rounded-xl p-3 space-y-2 shadow-sm border-l-4 border-l-cnsi-primary">
+                            <div class="flex justify-between items-center text-xs font-bold">
+                                <span>Cinto Florencia</span>
+                                <span class="bg-blue-100 text-cnsi-primary px-2 py-0.5 rounded">6 4 10</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs text-gray-500">
+                                <span>Maidana Maria</span>
+                                <span>4 6 7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-gray-300 text-xl"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <!-- Final -->
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold uppercase text-cnsi-dark bg-cnsi-accent py-1 px-3 rounded-full text-center mb-4 inline-block mx-auto font-extrabold">Gran Final</h4>
+                        <div class="bg-blue-50 border-2 border-blue-400 rounded-xl p-4 space-y-3 shadow-lg relative">
+                            <i class="fa-solid fa-crown text-amber-500 absolute -top-3 -right-2 text-xl rotate-12"></i>
+                            <div class="flex justify-between items-center text-xs font-bold text-gray-800">
+                                <span>Garcia Sanabria Alejandra</span>
+                                <span class="text-cnsi-primary font-extrabold">CAMPEONA</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs text-gray-500">
+                                <span>Cinto Florencia</span>
+                                <span>Subcampeona</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: PLAYERS / JUGADORAS -->
+        <section id="tab-players" class="tab-content hidden space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Nómina de Jugadoras (232)</h2>
+                    <p class="text-sm text-gray-500">Cargadas desde el archivo de Ranking 2026 S1.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="text" id="player-search-input" oninput="renderPlayers()" placeholder="Buscar por nombre..." class="bg-white border border-gray-300 rounded-lg text-xs font-medium px-3 py-2">
+                    <button onclick="openAddPlayerModal()" class="bg-cnsi-primary text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-cnsi-dark transition flex items-center space-x-2 shadow-sm">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>+ Agregar Jugadora</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Players Cards Grid -->
+            <div id="players-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic players -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: AGREGAR JUGADOR/A -->
+    <div id="modal-add-player" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-cnsi-primary"></i> Registrar Nueva Jugadora
+                </h3>
+                <button onclick="closeAddPlayerModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="add-player-form" onsubmit="handleSavePlayer(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre y Apellido *</label>
+                    <input type="text" id="player-name-input" required placeholder="Ej. Ana Martínez" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-cnsi-primary">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría *</label>
+                    <select id="player-category-input" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-cnsi-primary">
+                        <option value="A">Categoría A</option>
+                        <option value="B">Categoría B</option>
+                        <option value="C">Categoría C</option>
+                        <option value="D">Categoría D</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Puntos Iniciales</label>
+                    <input type="number" id="player-points-input" value="0" min="0" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-cnsi-primary">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeAddPlayerModal()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold bg-cnsi-primary text-white rounded-lg hover:bg-cnsi-dark">Guardar Jugadora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CARGAR RESULTADO -->
+    <div id="modal-score" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-gray-800 text-lg">Cargar Resultado</h3>
+                <button onclick="closeScoreModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="score-form" onsubmit="handleSaveScore(event)" class="space-y-4">
+                <input type="hidden" id="modal-match-id">
+                
+                <div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center font-bold text-sm">
+                    <span id="modal-player1-name" class="text-gray-800">Jugadora 1</span>
+                    <span class="text-xs text-gray-400">VS</span>
+                    <span id="modal-player2-name" class="text-gray-800">Jugadora 2</span>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                    <p class="font-semibold text-gray-500">Games por Set:</p>
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <span class="font-medium text-gray-600">Set 1</span>
+                        <input type="number" id="p1-s1" min="0" max="7" required class="border rounded p-2 text-center" placeholder="P1">
+                        <input type="number" id="p2-s1" min="0" max="7" required class="border rounded p-2 text-center" placeholder="P2">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <span class="font-medium text-gray-600">Set 2</span>
+                        <input type="number" id="p1-s2" min="0" max="7" required class="border rounded p-2 text-center" placeholder="P1">
+                        <input type="number" id="p2-s2" min="0" max="7" required class="border rounded p-2 text-center" placeholder="P2">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 items-center bg-blue-50 p-2 rounded-lg border border-blue-200">
+                        <span class="font-medium text-blue-900">Super Tiebreak (opcional)</span>
+                        <input type="number" id="p1-s3" min="0" max="20" class="border rounded p-2 text-center" placeholder="P1">
+                        <input type="number" id="p2-s3" min="0" max="20" class="border rounded p-2 text-center" placeholder="P2">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeScoreModal()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold bg-cnsi-primary text-white rounded-lg hover:bg-cnsi-dark">Guardar Marcador</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVO PARTIDO -->
+    <div id="modal-new-match" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-gray-800 text-lg">Programar Partido</h3>
+                <button onclick="closeNewMatchModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="new-match-form" onsubmit="handleSaveNewMatch(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría</label>
+                    <select id="new-match-category" onchange="populateMatchPlayersSelect()" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                        <option value="A">Categoría A</option>
+                        <option value="B">Categoría B</option>
+                        <option value="C">Categoría C</option>
+                        <option value="D">Categoría D</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Jugadora 1</label>
+                    <select id="new-match-p1" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Jugadora 2</label>
+                    <select id="new-match-p2" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Fecha y Hora</label>
+                    <input type="datetime-local" id="new-match-date" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Cancha</label>
+                    <input type="text" id="new-match-court" placeholder="Ej: Cancha 4 (Polvo)" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeNewMatchModal()" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold bg-cnsi-primary text-white rounded-lg hover:bg-cnsi-dark">Guardar Partido</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const initialPlayers = [{"id": 1, "name": "Garcia Sanabria Alejandra", "category": "A", "points": 200000, "ranking": 1}, {"id": 2, "name": "Cinto Florencia", "category": "A", "points": 128000, "ranking": 2}, {"id": 3, "name": "Maidana Maria", "category": "A", "points": 44000, "ranking": 3}, {"id": 4, "name": "Cougnet Ana", "category": "A", "points": 37800, "ranking": 4}, {"id": 5, "name": "Leroi Ivonne", "category": "A", "points": 34800, "ranking": 5}, {"id": 6, "name": "Ugalde Lucila", "category": "A", "points": 33400, "ranking": 6}, {"id": 7, "name": "Correa Urquiza Agustina", "category": "A", "points": 32000, "ranking": 7}, {"id": 8, "name": "Gradin Ines Maria", "category": "A", "points": 24800, "ranking": 8}, {"id": 9, "name": "Alonso Peña Victoria", "category": "A", "points": 22400, "ranking": 9}, {"id": 10, "name": "Bincaz Agustina", "category": "A", "points": 21800, "ranking": 10}, {"id": 11, "name": "Ochoa Maria", "category": "A", "points": 21200, "ranking": 11}, {"id": 12, "name": "Alonso Sofia", "category": "A", "points": 20780, "ranking": 12}, {"id": 13, "name": "Alonso Peña Delfina", "category": "A", "points": 17800, "ranking": 13}, {"id": 14, "name": "Friederichs Monica", "category": "A", "points": 17800, "ranking": 14}, {"id": 15, "name": "Lange Martina", "category": "A", "points": 17080, "ranking": 15}, {"id": 16, "name": "Catala Florencia", "category": "A", "points": 16240, "ranking": 16}, {"id": 17, "name": "Peluffo Carolina", "category": "A", "points": 16000, "ranking": 17}, {"id": 18, "name": "Marcon Carolina", "category": "A", "points": 15720, "ranking": 18}, {"id": 19, "name": "Castro Rios Lucia", "category": "A", "points": 14600, "ranking": 19}, {"id": 20, "name": "Bracht Sofia", "category": "A", "points": 13900, "ranking": 20}, {"id": 21, "name": "Eizayaga Maria", "category": "A", "points": 11800, "ranking": 21}, {"id": 22, "name": "Urbani Maria Julia", "category": "A", "points": 9000, "ranking": 22}, {"id": 23, "name": "Hynes Valeria", "category": "A", "points": 7600, "ranking": 23}, {"id": 24, "name": "Cougnet Moira", "category": "A", "points": 6400, "ranking": 24}, {"id": 25, "name": "Sartori Maria Jose", "category": "B", "points": 200000, "ranking": 1}, {"id": 26, "name": "Sanguinetti Maria", "category": "B", "points": 128000, "ranking": 2}, {"id": 27, "name": "Bustos Dolores", "category": "B", "points": 44000, "ranking": 3}, {"id": 28, "name": "Barrenechea Laura", "category": "B", "points": 39000, "ranking": 4}, {"id": 29, "name": "Fresco Gabriela", "category": "B", "points": 35200, "ranking": 5}, {"id": 30, "name": "Aiscar Ines", "category": "B", "points": 34800, "ranking": 6}, {"id": 31, "name": "Nunez Maria Agustina", "category": "B", "points": 32800, "ranking": 7}, {"id": 32, "name": "Fontan Balestra Magdalena", "category": "B", "points": 28000, "ranking": 8}, {"id": 33, "name": "Nunez Julia", "category": "B", "points": 25200, "ranking": 9}, {"id": 34, "name": "Arana Silvina", "category": "B", "points": 24600, "ranking": 10}, {"id": 35, "name": "Valenzuela Lucrecia", "category": "B", "points": 22600, "ranking": 11}, {"id": 36, "name": "Vila Soledad", "category": "B", "points": 20240, "ranking": 12}, {"id": 37, "name": "De Elia Josefina", "category": "B", "points": 19480, "ranking": 13}, {"id": 38, "name": "Haro Teresa", "category": "B", "points": 18280, "ranking": 14}, {"id": 39, "name": "Valenzuela Ines", "category": "B", "points": 18200, "ranking": 15}, {"id": 40, "name": "Fitte Mercedes Maria", "category": "B", "points": 17800, "ranking": 16}, {"id": 41, "name": "Ramos Mejia Ines", "category": "B", "points": 16400, "ranking": 17}, {"id": 42, "name": "Durañona Mercedes", "category": "B", "points": 16000, "ranking": 18}, {"id": 43, "name": "Rodriguez Oneto Victoria", "category": "B", "points": 15200, "ranking": 19}, {"id": 44, "name": "Aguirre Saravia Maria", "category": "B", "points": 14000, "ranking": 20}, {"id": 45, "name": "Mac Loughlin Cynthia", "category": "B", "points": 13800, "ranking": 21}, {"id": 46, "name": "Zocchi Mercedes", "category": "B", "points": 12800, "ranking": 22}, {"id": 47, "name": "Lamas Maria Sofia", "category": "B", "points": 12000, "ranking": 23}, {"id": 48, "name": "Peretti Carola", "category": "B", "points": 10880, "ranking": 24}, {"id": 49, "name": "Chihigoyen Ines", "category": "B", "points": 10000, "ranking": 25}, {"id": 50, "name": "Guevara Lynch Maria Teresa", "category": "B", "points": 8800, "ranking": 26}, {"id": 51, "name": "Piacentini Carolina", "category": "B", "points": 8200, "ranking": 27}, {"id": 52, "name": "Miguens Paula Maria", "category": "B", "points": 6400, "ranking": 28}, {"id": 53, "name": "Eizayaga Sofia", "category": "B", "points": 5800, "ranking": 29}, {"id": 54, "name": "Campana Silvina", "category": "B", "points": 5600, "ranking": 30}, {"id": 55, "name": "Paz Posse Ines Maria", "category": "B", "points": 4800, "ranking": 31}, {"id": 56, "name": "Suarez Maria Belen", "category": "B", "points": 4800, "ranking": 32}, {"id": 57, "name": "Capurro Sofia", "category": "C", "points": 200000, "ranking": 1}, {"id": 58, "name": "Guido Lavalle Patricia", "category": "C", "points": 128000, "ranking": 2}, {"id": 59, "name": "Lopez Carresi Ines Maria", "category": "C", "points": 44000, "ranking": 3}, {"id": 60, "name": "De Carli Veronica Sofia", "category": "C", "points": 39800, "ranking": 4}, {"id": 61, "name": "Bastos Maria Candelaria", "category": "C", "points": 38800, "ranking": 5}, {"id": 62, "name": "Muller Ines Maria", "category": "C", "points": 32800, "ranking": 6}, {"id": 63, "name": "Larrigaudiere Silvina Maria", "category": "C", "points": 31400, "ranking": 7}, {"id": 64, "name": "Nunez Josefina", "category": "C", "points": 27800, "ranking": 8}, {"id": 65, "name": "Contador Maria Jose", "category": "C", "points": 26800, "ranking": 9}, {"id": 66, "name": "Capurro Felicitas", "category": "C", "points": 25200, "ranking": 10}, {"id": 67, "name": "Cereijo Ines Maria", "category": "C", "points": 22600, "ranking": 11}, {"id": 68, "name": "Ramos Mejia Sofia", "category": "C", "points": 21800, "ranking": 12}, {"id": 69, "name": "Bustamante Ines", "category": "C", "points": 19680, "ranking": 13}, {"id": 70, "name": "Bustillo Maria Ines", "category": "C", "points": 19480, "ranking": 14}, {"id": 71, "name": "Uriburu Cecilia Maria", "category": "C", "points": 19200, "ranking": 15}, {"id": 72, "name": "De Prat Gay Clara", "category": "C", "points": 18280, "ranking": 16}, {"id": 73, "name": "Bustillo Carolina", "category": "C", "points": 17800, "ranking": 17}, {"id": 74, "name": "Garavaglia Florencia", "category": "C", "points": 17400, "ranking": 18}, {"id": 75, "name": "Ugalde Dolores", "category": "C", "points": 16240, "ranking": 19}, {"id": 76, "name": "Lopez Carresi Felicitas", "category": "C", "points": 16000, "ranking": 20}, {"id": 77, "name": "Capurro Alexia", "category": "C", "points": 15800, "ranking": 21}, {"id": 78, "name": "Nazar Anchorena Milagros", "category": "C", "points": 12800, "ranking": 22}, {"id": 79, "name": "Ramos Maria Ines", "category": "C", "points": 11800, "ranking": 23}, {"id": 80, "name": "Basavilbaso Juana", "category": "C", "points": 11400, "ranking": 24}, {"id": 81, "name": "O'Farrell Sofia", "category": "C", "points": 10000, "ranking": 25}, {"id": 82, "name": "Barroso Maria Marta", "category": "C", "points": 9800, "ranking": 26}, {"id": 83, "name": "Garcia Mansilla Maria Josefina", "category": "C", "points": 8800, "ranking": 27}, {"id": 84, "name": "Durañona Veronica Maria", "category": "C", "points": 8400, "ranking": 28}, {"id": 85, "name": "Aiscar Sofia", "category": "C", "points": 8200, "ranking": 29}, {"id": 86, "name": "San Martin Josefina", "category": "C", "points": 7600, "ranking": 30}, {"id": 87, "name": "Muller Lucia Maria", "category": "C", "points": 6400, "ranking": 31}, {"id": 88, "name": "Fitte Clara Maria", "category": "C", "points": 6000, "ranking": 32}, {"id": 89, "name": "Aguirre Saravia Paz", "category": "D", "points": 200000, "ranking": 1}, {"id": 90, "name": "Falke Maria Sol", "category": "D", "points": 128000, "ranking": 2}, {"id": 91, "name": "Capurro Jacinta", "category": "D", "points": 44000, "ranking": 3}, {"id": 92, "name": "Ratti Maria Candelaria", "category": "D", "points": 40800, "ranking": 4}, {"id": 93, "name": "De Carabassa Magdalena", "category": "D", "points": 38800, "ranking": 5}, {"id": 94, "name": "Homet Ana Clara", "category": "D", "points": 36800, "ranking": 6}, {"id": 95, "name": "Guarini Maria Victoria", "category": "D", "points": 34800, "ranking": 7}, {"id": 96, "name": "Goyenechea Maria Florencia", "category": "D", "points": 30800, "ranking": 8}, {"id": 97, "name": "Esterkin Patricia Susana", "category": "D", "points": 30240, "ranking": 9}, {"id": 98, "name": "Sivori Clara Maria", "category": "D", "points": 29800, "ranking": 10}, {"id": 99, "name": "Vazquez Mariana", "category": "D", "points": 28800, "ranking": 11}, {"id": 100, "name": "Contador Teresa", "category": "D", "points": 27240, "ranking": 12}];
+
+        const initialMatches = [
+            {
+                id: 101,
+                player1Id: 1,
+                player2Id: 2,
+                category: "A",
+                date: "2026-10-25T15:00",
+                court: "Cancha 1",
+                played: false,
+                p1Sets: 0,
+                p2Sets: 0,
+                scoreDetails: "",
+                winnerId: null
+            }
+        ];
+
+        let players = JSON.parse(localStorage.getItem('cnsi_players_blue')) || initialPlayers;
+        let matches = JSON.parse(localStorage.getItem('cnsi_matches_blue')) || initialMatches;
+
+        function saveData() {
+            localStorage.setItem('cnsi_players_blue', JSON.stringify(players));
+            localStorage.setItem('cnsi_matches_blue', JSON.stringify(matches));
+        }
+
+        function resetData() {
+            if (confirm("¿Restaurar los datos originales del club?")) {
+                localStorage.removeItem('cnsi_players_blue');
+                localStorage.removeItem('cnsi_matches_blue');
+                players = initialPlayers;
+                matches = initialMatches;
+                saveData();
+                initApp();
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-tab'));
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).classList.add('active-tab');
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'standings') renderStandings();
+            if (tabId === 'fixture') renderFixture();
+            if (tabId === 'players') renderPlayers();
+        }
+
+        function renderDashboard() {
+            document.getElementById('dash-total-players').innerText = players.length;
+            const played = matches.filter(m => m.played).length;
+            document.getElementById('dash-played-matches').innerText = played;
+            document.getElementById('dash-pending-matches').innerText = matches.length - played;
+
+            const upcomingContainer = document.getElementById('dash-upcoming-list');
+            upcomingContainer.innerHTML = '';
+
+            const pendingMatches = matches.filter(m => !m.played);
+
+            if (pendingMatches.length === 0) {
+                upcomingContainer.innerHTML = `<p class="text-xs text-gray-400 py-4 text-center">No hay partidos pendientes en este momento.</p>`;
+            } else {
+                pendingMatches.forEach(match => {
+                    const p1 = players.find(p => p.id === match.player1Id) || { name: 'Por definir' };
+                    const p2 = players.find(p => p.id === match.player2Id) || { name: 'Por definir' };
+                    
+                    const dateFormatted = new Date(match.date).toLocaleString('es-AR', {
+                        weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    upcomingContainer.innerHTML += `
+                        <div class="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-center min-w-[50px]">
+                                    <i class="fa-solid fa-calendar-day block text-sm"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-800">${p1.name} <span class="text-gray-400 font-normal">vs</span> ${p2.name}</h5>
+                                    <p class="text-[11px] text-gray-500">${match.court} &bull; Cat. ${match.category}</p>
+                                </div>
+                            </div>
+                            <span class="bg-white border text-gray-600 px-2.5 py-1 rounded-md font-medium text-[11px]">
+                                ${dateFormatted} hs
+                            </span>
+                        </div>
+                    `;
+                });
+            }
+
+            const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
+            if (sortedPlayers.length > 0) {
+                const leader = sortedPlayers[0];
+                document.getElementById('dash-leader-name').innerText = leader.name;
+                document.getElementById('dash-leader-points').innerText = `${leader.points.toLocaleString()} Puntos Totales`;
+                document.getElementById('dash-leader-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(leader.name)}&background=3b82f6&color=fff`;
+            }
+        }
+
+        function renderStandings() {
+            const filterCat = document.getElementById('standings-category-filter').value;
+            const search = document.getElementById('standings-search').value.toLowerCase();
+            const tbody = document.getElementById('standings-table-body');
+            tbody.innerHTML = '';
+
+            let filtered = [...players];
+
+            if (filterCat !== 'ALL') {
+                filtered = filtered.filter(p => p.category === filterCat);
+            }
+
+            if (search) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
+            }
+
+            filtered.sort((a, b) => b.points - a.points);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-400 text-xs">No se encontraron jugadoras.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((p, index) => {
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1e3a8a&color=fff`;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-center font-bold text-gray-500">${p.ranking || index + 1}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-800 flex items-center space-x-3">
+                            <img class="w-8 h-8 rounded-full object-cover border" src="${avatarUrl}" alt="${p.name}">
+                            <span>${p.name}</span>
+                        </td>
+                        <td class="py-3 px-4 text-center text-xs font-medium text-gray-500">
+                            <span class="px-2.5 py-1 rounded-full border bg-gray-50 font-bold">Cat. ${p.category}</span>
+                        </td>
+                        <td class="py-3 px-4 text-right font-extrabold text-blue-900 text-base">${p.points.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderFixture() {
+            const filterCat = document.getElementById('fixture-category-filter').value;
+            const container = document.getElementById('fixture-matches-list');
+            container.innerHTML = '';
+
+            let filteredMatches = matches;
+            if (filterCat !== 'ALL') {
+                filteredMatches = matches.filter(m => m.category === filterCat);
+            }
+
+            if (filteredMatches.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center py-10 bg-white rounded-2xl border text-gray-400 text-xs">No hay partidos cargados para esta categoría.</div>`;
+                return;
+            }
+
+            filteredMatches.forEach(m => {
+                const p1 = players.find(p => p.id === m.player1Id) || { name: 'Desconocida' };
+                const p2 = players.find(p => p.id === m.player2Id) || { name: 'Desconocida' };
+
+                const dateFormatted = new Date(m.date).toLocaleString('es-AR', {
+                    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md font-medium">Categoría ${m.category}</span>
+                            <span class="text-gray-400"><i class="fa-regular fa-clock mr-1"></i> ${dateFormatted} hs</span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-2 rounded-lg ${m.winnerId === p1.id ? 'bg-blue-50 font-bold border border-blue-200' : 'bg-gray-50'}">
+                                <span class="text-xs text-gray-800">${p1.name}</span>
+                                ${m.winnerId === p1.id ? '<span class="text-xs text-blue-700"><i class="fa-solid fa-check"></i></span>' : ''}
+                            </div>
+                            <div class="flex justify-between items-center p-2 rounded-lg ${m.winnerId === p2.id ? 'bg-blue-50 font-bold border border-blue-200' : 'bg-gray-50'}">
+                                <span class="text-xs text-gray-800">${p2.name}</span>
+                                ${m.winnerId === p2.id ? '<span class="text-xs text-blue-700"><i class="fa-solid fa-check"></i></span>' : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
+                            <span class="text-gray-500 font-medium"><i class="fa-solid fa-location-dot mr-1 text-blue-600"></i> ${m.court}</span>
+                            <div>
+                                ${m.played ? `
+                                    <span class="font-extrabold text-blue-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">${m.scoreDetails}</span>
+                                ` : `
+                                    <button onclick="openScoreModal(${m.id})" class="bg-blue-900 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-800 transition">
+                                        Cargar Resultado
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderPlayers() {
+            const search = document.getElementById('player-search-input').value.toLowerCase();
+            const container = document.getElementById('players-cards-grid');
+            container.innerHTML = '';
+
+            let filtered = players;
+            if (search) {
+                filtered = players.filter(p => p.name.toLowerCase().includes(search));
+            }
+
+            filtered.slice(0, 60).forEach(p => {
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1e3a8a&color=fff`;
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center space-x-3">
+                        <img class="w-12 h-12 rounded-full object-cover border border-blue-200 shadow-sm" src="${avatarUrl}" alt="${p.name}">
+                        <div class="space-y-0.5 overflow-hidden">
+                            <h4 class="font-bold text-gray-800 text-xs truncate">${p.name}</h4>
+                            <p class="text-[11px] text-gray-500">Categoría: <strong>${p.category}</strong></p>
+                            <p class="text-[11px] text-blue-900 font-bold">${p.points.toLocaleString()} Pts</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAddPlayerModal() {
+            document.getElementById('add-player-form').reset();
+            document.getElementById('modal-add-player').classList.remove('hidden');
+        }
+
+        function closeAddPlayerModal() {
+            document.getElementById('modal-add-player').classList.add('hidden');
+        }
+
+        function handleSavePlayer(e) {
+            e.preventDefault();
+            const name = document.getElementById('player-name-input').value.trim();
+            const category = document.getElementById('player-category-input').value;
+            const points = parseInt(document.getElementById('player-points-input').value) || 0;
+
+            const newPlayer = {
+                id: Date.now(),
+                name,
+                category,
+                points,
+                ranking: players.length + 1
+            };
+
+            players.push(newPlayer);
+            saveData();
+            closeAddPlayerModal();
+            renderPlayers();
+            renderDashboard();
+            renderStandings();
+            alert(`¡${name} agregada con éxito!`);
+        }
+
+        function openScoreModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            const p1 = players.find(p => p.id === match.player1Id) || { name: 'P1' };
+            const p2 = players.find(p => p.id === match.player2Id) || { name: 'P2' };
+
+            document.getElementById('modal-match-id').value = match.id;
+            document.getElementById('modal-player1-name').innerText = p1.name;
+            document.getElementById('modal-player2-name').innerText = p2.name;
+
+            document.getElementById('score-form').reset();
+            document.getElementById('modal-score').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('modal-score').classList.add('hidden');
+        }
+
+        function handleSaveScore(e) {
+            e.preventDefault();
+            const matchId = parseInt(document.getElementById('modal-match-id').value);
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            const p1s1 = parseInt(document.getElementById('p1-s1').value) || 0;
+            const p2s1 = parseInt(document.getElementById('p2-s1').value) || 0;
+            const p1s2 = parseInt(document.getElementById('p1-s2').value) || 0;
+            const p2s2 = parseInt(document.getElementById('p2-s2').value) || 0;
+            const p1s3 = parseInt(document.getElementById('p1-s3').value) || 0;
+            const p2s3 = parseInt(document.getElementById('p2-s3').value) || 0;
+
+            let p1SetsWon = 0;
+            let p2SetsWon = 0;
+
+            if (p1s1 > p2s1) p1SetsWon++; else if (p2s1 > p1s1) p2SetsWon++;
+            if (p1s2 > p2s2) p1SetsWon++; else if (p2s2 > p1s2) p2SetsWon++;
+
+            let scoreText = `${p1s1}-${p2s1} / ${p1s2}-${p2s2}`;
+
+            if (p1s3 > 0 || p2s3 > 0) {
+                if (p1s3 > p2s3) p1SetsWon++; else if (p2s3 > p1s3) p2SetsWon++;
+                scoreText += ` / ${p1s3}-${p2s3}`;
+            }
+
+            match.played = true;
+            match.p1Sets = p1SetsWon;
+            match.p2Sets = p2SetsWon;
+            match.scoreDetails = scoreText;
+            match.winnerId = p1SetsWon > p2SetsWon ? match.player1Id : match.player2Id;
+
+            saveData();
+            closeScoreModal();
+            renderFixture();
+            renderStandings();
+            renderDashboard();
+        }
+
+        function openNewMatchModal() {
+            populateMatchPlayersSelect();
+            document.getElementById('modal-new-match').classList.remove('hidden');
+        }
+
+        function closeNewMatchModal() {
+            document.getElementById('modal-new-match').classList.add('hidden');
+        }
+
+        function populateMatchPlayersSelect() {
+            const cat = document.getElementById('new-match-category').value;
+            const filtered = players.filter(p => p.category === cat);
+
+            const select1 = document.getElementById('new-match-p1');
+            const select2 = document.getElementById('new-match-p2');
+
+            select1.innerHTML = '';
+            select2.innerHTML = '';
+
+            filtered.forEach(p => {
+                select1.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                select2.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        }
+
+        function handleSaveNewMatch(e) {
+            e.preventDefault();
+            const category = document.getElementById('new-match-category').value;
+            const p1Id = parseInt(document.getElementById('new-match-p1').value);
+            const p2Id = parseInt(document.getElementById('new-match-p2').value);
+            const date = document.getElementById('new-match-date-input').value; // check
+            const court = document.getElementById('new-match-court').value;
+
+            // Simple fix for date field ID
+            const dateVal = document.getElementById('new-match-date').value;
+
+            if (p1Id === p2Id) {
+                alert("Debes seleccionar dos jugadoras diferentes.");
+                return;
+            }
+
+            const newMatch = {
+                id: Date.now(),
+                player1Id: p1Id,
+                player2Id: p2Id,
+                category,
+                date: dateVal,
+                court,
+                played: false,
+                p1Sets: 0,
+                p2Sets: 0,
+                scoreDetails: "",
+                winnerId: null
+            };
+
+            matches.push(newMatch);
+            saveData();
+            closeNewMatchModal();
+            renderFixture();
+            renderDashboard();
+        }
+
+        function initApp() {
+            renderDashboard();
+            renderStandings();
+            renderFixture();
+            renderPlayers();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
